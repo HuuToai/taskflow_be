@@ -19,4 +19,9 @@ class Department extends Model
     {
         return $this->hasMany(User::class);
     }
+    // Mutator: Tự động chuyển code thành chữ in hoa
+    public function setCodeAttribute($value)
+    {
+        $this->attributes['code'] = strtoupper($value);
+    }
 }

@@ -11,33 +11,9 @@ use Auth;
 use Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+
 class AuthController extends Controller
 {
-    
-    // Đăng ký người dùng mới (nhân viên)
-    public function register(Request $request)
-    {
-        // Validate dữ liệu
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:8|confirmed',
-        ]);
-
-        // Tạo người dùng mới
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'is_active' => 1, // Đảm bảo tài khoản hoạt động
-        ]);
-
-        // Trả về thông tin người dùng và token
-        return response()->json([
-            'user' => $user,
-            'message' => 'Tạo tài khoản thành công',
-        ], 201);
-    }
 
     // Đăng nhập và nhận token
     public function login(Request $request)
@@ -60,16 +36,13 @@ class AuthController extends Controller
             'email.email' => 'Email không hợp lệ',
             'email.max' => 'Email không được vượt quá 255 ký tự',
             'email.regex' => 'Email không hợp lệ. Vui lòng kiểm tra lại',
-            // 'password.regex' => 'Mật khẩu phải bao gồm ít nhất 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt',
+            'password.regex' => 'Mật khẩu phải bao gồm ít nhất 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt',
             'password.required' => 'Vui lòng nhập mật khẩu',
             'password.min' => 'Mật khẩu phải có ít nhất 8 ký tự',
         ]);
-
         $email = $request->email;
         $password = $request->password;
-
         try {
-
             if (Auth::attempt(['email' => $email, 'password' => $password])) {
                 $user = Auth::user();
                 // Kiểm tra trạng thái tài khoản
@@ -78,6 +51,13 @@ class AuthController extends Controller
                         'response_code' => '403',
                         'status' => 'error',
                         'message' => 'Tài khoản đã bị khóa.',
+                    ], 403);
+                }
+                if ($user->deleted_at !== null) {
+                    return response()->json([
+                        'response_code' => '403',
+                        'status' => 'error',
+                        'message' => 'Tài khoản đã Xóaaaaaaaa.',
                     ], 403);
                 }
                 $token = $user->createToken($user->email)->accessToken;

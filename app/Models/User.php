@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable,HasApiTokens;
+    use HasFactory, Notifiable,HasApiTokens, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -18,7 +20,7 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     // Các trường có thể được fillable (có thể gán giá trị qua mass-assignment)
-    protected $fillable = ['name', 'email', 'password', 'is_active', 'created_by', 'department_id', 'employee_code'];
+    protected $fillable = ['name', 'email', 'password', 'is_active', 'created_by', 'department_id', 'employee_code', 'deleted_at'];
 
 
     /**
@@ -35,6 +37,10 @@ class User extends Authenticatable
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+    public function tasks()
+    {
+        return $this->hasMany(Task::class, 'assignee');
     }
 
     /**
